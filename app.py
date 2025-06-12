@@ -3,8 +3,8 @@ import google.generativeai as genai
 from flask import Flask, request, jsonify, render_template
 
 # --- CẤU HÌNH ---
-# Dán API Key của Google AI bạn đã tạo vào đây
-GEMINI_API_KEY = "AIzaSyC3bWlPmy1DYUB4mTuP80zQB-a4VRfTBE4"
+# Code MỚI: Đọc key từ biến môi trường trên server Render
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 genai.configure(api_key=GEMINI_API_KEY)
 
 
