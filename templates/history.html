@@ -1,0 +1,20 @@
+<body>
+    <div class="container">
+        <h1>Lịch Sử Bệnh Án</h1>
+        <a href="/">&larr; Trở về trang chính</a>
+
+        {% for record in records %}
+            <div class="record">
+                <h3>Hồ sơ #{{ record.id }} - {{ record.patient_name }}</h3>
+                <p><strong>Ngày tạo:</strong> {{ record.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</p>
+                <p><strong>Triệu chứng đã khai:</strong> {{ record.symptoms }}</p>
+                <p><strong>Phương pháp điều trị:</strong> {{ record.treatment }}</p>
+                <h4>Báo cáo do AI tạo:</h4>
+                <pre>{{ record.ai_report }}</pre>
+            </div>
+        {% else %}
+            <p style="margin-top: 20px;">Chưa có hồ sơ nào được lưu.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
