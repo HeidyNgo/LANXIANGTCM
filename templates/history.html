@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TCM Case Record History</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f4f6fa;
+            padding: 30px;
+        }
+        .record-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .record-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .record-item:last-child {
+            border-bottom: none;
+        }
+        .btn-sm {
+            font-size: 0.875rem;
+        }
+        .btn {
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="mb-4">TCM Case Record History</h2>
+
+        {% for date_key, records in grouped_records.items() %}
+        <div class="record-container">
+            <div class="record-header">📅 Date: {{ date_key }}</div>
+            {% for record in records %}
+            <div class="record-item">
+                <div>
+                    <strong>{{ record.patient_name }}</strong> (ID: {{ record.id }})
+                </div>
+                <div>
+                    <a href="{{ url_for('download_record', record_id=record.id) }}" class="btn btn-primary btn-sm">Download PDF</a>
+                    <form method="POST" action="{{ url_for('delete_record', record_id=record.id) }}" style="display:inline;" onsubmit="return confirmDelete(this);">
+                        <input type="hidden" name="password">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function confirmDelete(form) {
+            const pw = prompt("Enter password to delete:");
+            if (pw === null) return false;
+            form.querySelector('input[name="password"]').value = pw;
+            return true;
+        }
+    </script>
+</body>
+</html>
