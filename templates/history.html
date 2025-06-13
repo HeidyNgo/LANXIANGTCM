@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử Bệnh Án</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .date-group { margin-top: 25px; border: 1px solid #ccc; border-radius: 5px; }
+        .date-header { background-color: #e9ecef; padding: 10px 15px; font-size: 20px; font-weight: bold; cursor: pointer; }
+        .record-list { padding: 0 15px 15px 15px; }
+        .record { border-bottom: 1px solid #eee; padding: 10px 0; }
+        .record:last-child { border-bottom: none; }
+        .record-summary { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            cursor: pointer;
+            flex-wrap: wrap;
+        }
+        .record-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .download-btn { 
+            display: inline-block; 
+            background-color: #28a745; 
+            color: white !important; 
+            padding: 5px 10px; 
+            font-size: 14px; 
+            border-radius: 4px; 
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .download-btn:hover { text-decoration: none; opacity: 0.9; }
+        .delete-form button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .delete-form button:hover { opacity: 0.9; }
+        .record-details { padding-left: 20px; border-left: 3px solid #007bff; margin-top: 10px; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #ddd; }
+        a { color: #007bff; text-decoration: none; font-size: 18px; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lịch Sử Bệnh Án</h1>
+        <a href="/">&larr; Trở về trang chính</a>
+
+        {% for date, records_on_date in grouped_records.items() %}
+            <details class="date-group" open>
+                <summary class="date-header">Ngày {{ date }}</summary>
+                <div class="record-list">
+                    {% for record in records_on_date %}
+                        <details class="record">
+                            <summary class="record-summary">
+                                <span>Hồ sơ #{{ record.id }} - {{ record.patient_name }}</span>
+                                <div class="record-actions">
+                                    <a href="/download/{{ record.id }}" class="download-btn" onclick="event.stopPropagation()">Tải về (.txt)</a>
+                                    <form action="{{ url_for('delete_record', record_id=record.id) }}" method="post" class="delete-form" style="display:inline-block; margin-left: 10px;">
+                                        <button type="button" class="download-btn" style="background-color: #dc3545; color: white; border: none; cursor: pointer;" onclick="promptAndDelete(this.form)">Xóa</button>
+                                    </form>
+                                </div>
+                            </summary>
+                            <div class="record-details">
+                                <p><strong>Thời gian tạo (giờ địa phương):</strong> <span class="local-time" data-utc-time="{{ record.created_at.isoformat() }}">Loading...</span></p>
+                                <p><strong>Triệu chứng đã khai:</strong> {{ record.symptoms }}</p>
+                                <p><strong>Phương pháp điều trị:</strong> {{ record.treatment }}</p>
+                                <h4>Báo cáo do AI tạo:</h4>
+                                <pre>{{ record.ai_report }}</pre>
+                            </div>
+                        </details>
+                    {% endfor %}
+                </div>
+            </details>
+        {% else %}
+            <p style="margin-top: 20px;">Chưa có hồ sơ nào được lưu.</p>
+        {% endfor %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeElements = document.querySelectorAll('.local-time');
+            timeElements.forEach(function(element) {
+                const utcDateString = element.getAttribute('data-utc-time');
+                if (utcDateString) {
+                    const date = new Date(utcDateString); // KHÔNG thêm 'Z'
+                    const options = {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    };
+                    element.textContent = date.toLocaleString(undefined, options);
+                }
+            });
+        });
+
+        function promptAndDelete(form) {
+            if (!confirm('Bạn có chắc chắn muốn xóa hồ sơ này không? Hành động này không thể hoàn tác và cần nhập mật khẩu.')) {
+                return;
+            }
+
+            const password = prompt('Vui lòng nhập mật khẩu để xóa hồ sơ:');
+            if (password === null) return;
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'password';
+            input.value = password;
+
+            form.appendChild(input);
+            form.submit();
+        }
+    </script>
+</body>
+</html>
