@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TCM Case Record History</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .record {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .record h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #007bff;
+            cursor: pointer;
+        }
+
+        .record small {
+            display: block;
+            color: #666;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .report-content {
+            display: none;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .btn-download, .btn-delete {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-download {
+            background-color: #007bff;
+        }
+
+        .btn-download:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        input[type="password"] {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TCM Case Record History</h1>
+        {% for record in records %}
+        <div class="record">
+            <h2 onclick="toggleReport('report-{{ loop.index }}')">{{ record.patient_name }}</h2>
+            <small>Created: {{ record.created_at.strftime('%Y-%m-%d') }}</small>
+            <div id="report-{{ loop.index }}" class="report-content">
+                {{ record.ai_report }}
+                <br><br>
+                <a href="{{ url_for('download_record', record_id=record.id) }}" class="btn-download">Download PDF</a>
+                <form action="{{ url_for('delete_record', record_id=record.id) }}" method="post" style="display:inline;" onsubmit="return confirmDelete()">
+                    <input type="password" name="password" placeholder="Enter password" required>
+                    <button type="submit" class="btn-delete">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function toggleReport(id) {
+            const report = document.getElementById(id);
+            if (report.style.display === "none" || report.style.display === "") {
+                report.style.display = "block";
+            } else {
+                report.style.display = "none";
+            }
+        }
+
+        function confirmDelete() {
+            return confirm("Are you sure you want to delete this record?");
+        }
+    </script>
+</body>
+</html>
